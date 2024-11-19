@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <title>JSON API</title>
+</head>
+
+
+<body class="container-fluid" onload="bodyload()">
+    <header class="d-flex bg-light border border-1 align-items-center justify-content-between p-3">
+        <div><span class="fs-3 fw-bold">My Shop</span></div>
+        <div>
+            <div class="input-group">
+                <input type="text" id="txtSearch" placeholder="Search Fakestore" class="form-control">
+                <button onclick="SearchClick()" class="bi bi-search btn btn-warning"></button>
+            </div>
+        </div>
+        <div>
+            <button onclick="ShowCart()" class="bi bi-cart4 btn btn-warning position-relative" data-bs-target="#cart"
+                data-bs-toggle="modal">
+                <span class="badge bg-danger rounded rounded-circle position-absolute" id="lblCount"></span>
+            </button>
+            <div class="modal fade" id="cart">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Your Cart Items</h2>
+                            <button class="btn btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Preview</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <section class="d-flex justify-content-center border border-2 py-2">
+        <div class="fs-7">
+            <span>
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products')">Home</a>
+            </span>
+            <span class="mx-4">
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/beauty')">Beauty</a>
+            </span>
+            <span>
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/fragrances')">Fragrances</a>
+            </span>
+            <span class="mx-4">
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/furniture')">Furniture</a>
+            </span>
+            <span>
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/groceries')">Groceries</a>
+            </span>
+            <span class="mx-4">
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/home-decoration')">Home-decoration</a>
+            </span>
+            <span>
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/kitchen-accessories')">Kitchen-accessories</a>
+            </span>
+            <span class="mx-4">
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/skin-care')">Skin-care</a>
+            </span>
+            <span>
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/tops')">Tops</a>
+            </span>
+            <span class="mx-4">
+                <a class="text-decoration-none text-dark"
+                    href="javascript:LoadProducts('https://dummyjson.com/products/category/womens-dresses')">Womens-dresses</a>
+            </span>
+        </div>
+    </section>
+
+    <section class="row mt-4">
+        <nav class="col-2">
+            <div>
+                <label class="form-label fw-bold">Select Category</label>
+                <div>
+                    <select onchange="CategoryChange()" id="lstCategories" class="form-select"></select>
+                    <option></option>
+                </div>
+            </div>
+            <div class="mt-4">
+                <label class="form-label fw-bold">Ratings</label>
+                <div>
+                    <input id="optRating" onchange="RatingChange()" type="checkbox" class="form-check-input"> <label>4.5
+                        <span class="bi bi-star-fill text-success"></span> Above</label>
+                </div>
+            </div>
+        </nav>
+        <main class="col-10 d-flex flex-wrap overflow-auto" style="height: 100vh;">
+
+        </main>
+    </section>
+    <script>
+
+const LoadCategories = (() => {
+            fetch('https://dummyjson.com/products/categories')
+                .then(res => res.json())
+                .then((categories) => {
+                    console.log(categories); 
+                    categories.unshift("all"); 
+                    categories.forEach((category) => {
+                        let option = document.createElement("option");
+                        option.text = category.toUpperCase();
+                        option.value = category;
+                        document.getElementById("lstCategories").appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching categories:", error);
+                });
+        });
+
+
+        const LoadProducts = ((url) => {
+            document.querySelector("main").innerHTML = "";
+            fetch(url)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+
+                    const products = data.products;
+
+
+                    if (!products || products.length === 0) {
+                        document.querySelector("main").innerHTML = "<p>No products found.</p>";
+                        return;
+                    }
+
+                    products.forEach(function (product) {
+                        var div = document.createElement("div");
+                        div.className = "card m-2 p-2";
+                        div.style.width = "200px";
+                        div.innerHTML = `
+                        <img class="card-img-top" src="${product.images[0]}" height="160px" alt="${product.title}">
+                        <div class="card-header overflow-hidden" style="height:120px;">
+                            ${product.title}
+                        </div>
+                        <div class="card-body">
+                            <dl>
+                                <dt> Price </dt>
+                                <dd> $${product.price} </dd>
+                                <dt> Rating </dt>
+                                <dd> ${product.rating} <span class="bi bi-star-fill text-success"> </span> </dd>
+                            </dl>
+                        </div>
+                        <div class="card-footer">
+                            <button onclick="AddClick(${product.id})" class="bi bi-cart3 btn btn-warning"> Add to Cart </button>
+                        </div>
+                    `;
+                        document.querySelector("main").appendChild(div);
+                    });
+                })
+        });
+
+        const bodyload = (() => {
+            LoadCategories();
+            LoadProducts("https://dummyjson.com/products");
+            GetCartCount();
+        });
+
+
+        const SearchClick = () => {
+            const searchTerm = document.getElementById("txtSearch").value;
+            const searchUrl = 'https://dummyjson.com/products/';
+            LoadProducts(searchUrl);
+        };
+
+
+        const GetCartCount = () => {
+            const cartCount = localStorage.getItem('cartCount') || 0;
+            document.getElementById('lblCount').textContent = cartCount;
+        };
+
+
+        const AddClick = (productId) => {
+            console.log(`Product with ID ${productId} added to cart.`);
+            let cartCount = parseInt(localStorage.getItem('cartCount') || 0);
+            cartCount++;
+            localStorage.setItem('cartCount', cartCount);
+            GetCartCount();
+        };
+
+        window.onload = bodyload;
+
+
+    </script>
+</body>
+
+</html>
