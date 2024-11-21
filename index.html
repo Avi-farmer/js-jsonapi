@@ -40,7 +40,7 @@
                                 <thead>
                                     <tr>
                                         <th>Title</th>
-                                        <th>Preview</th>
+                                        <th>Image</th>
                                         <th>Price</th>
                                     </tr>
                                 </thead>
@@ -126,7 +126,7 @@ const LoadCategories = (() => {
             fetch('https://dummyjson.com/products/category-list')
                 .then(response => response.json())
                 .then((categories) => {
-                    categories.unshift("All"); 
+                    categories.unshift("All");
                     categories.map((category) => {
                         let option = document.createElement("option");
                         option.text = category;
@@ -153,7 +153,7 @@ const LoadCategories = (() => {
                         return;
                     }
 
-                    products.forEach(function (product) {
+                    products.map(function (product) {
                         var div = document.createElement("div");
                         div.className = "card m-2 p-2";
                         div.style.width = "200px";
@@ -171,7 +171,7 @@ const LoadCategories = (() => {
                             </dl>
                         </div>
                         <div class="card-footer">
-                            <button onclick="AddClick(${product.id})" class="bi bi-cart3 btn btn-warning"> Add to Cart </button>
+                            <button onclick="AddClick(${product.id}, '${product.title}', '${product.images[0]}', ${product.price})" class="bi bi-cart3 btn btn-warning"> Add to Cart </button>
                         </div>
                     `;
                         document.querySelector("main").appendChild(div);
@@ -208,13 +208,38 @@ const LoadCategories = (() => {
         };
 
 
-        const AddClick = (productId) => {
-            console.log(`Product with ID ${productId} added to cart.`);
-            let cartCount = parseInt(localStorage.getItem('cartCount') || 0);
-            cartCount++;
+        const AddClick = (productId, title, image, price ) => {
+            console.log(`Product with ID ${productId}, Title: ${title}, Price: ${price}`);
+            let cart = JSON.parse(localStorage.getItem('cartItems')) || [];
+            const newProduct = { productId, title, image, price };
+            cart.push(newProduct);
+            let cartCount = cart.length;
+            localStorage.setItem('cartItems', JSON.stringify(cart));
             localStorage.setItem('cartCount', cartCount);
             GetCartCount();
         };
+
+        const ShowCart = (() => {
+            const cart = JSON.parse(localStorage.getItem('cartItems')) || [];
+            document.querySelector("tbody").innerHTML = "";
+            cart.forEach((item) => {
+                var tr = document.createElement("tr");
+                var tdTitle = document.createElement("td");
+                var tdPrice = document.createElement("td");
+                var tdImage = document.createElement("td");
+
+                tdTitle.innerHTML = item.title;
+                tdImage.innerHTML = `<img src=${item.image} width="50" height="50">`;
+                tdPrice.innerHTML = item.price;
+
+                
+                tr.appendChild(tdTitle);
+                tr.appendChild(tdImage);
+                tr.appendChild(tdPrice);
+
+                document.querySelector("tbody").appendChild(tr);
+            })
+        });
 
         window.onload = bodyload;
 
